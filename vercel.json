@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/The Chess Compendium-1.html" }
+  ]
+}
