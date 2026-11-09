@@ -1,0 +1,1789 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Chess Compendium</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  /* Layout: dark hero band with a live board, light content bands below, each section head carries a ghost piece, checkered strips mark the transitions. */
+  --bg: #eceff3;
+  --surface: #f7f7f3;
+  --card: #ffffff;
+  --ink: #141b2a;
+  --muted: #52607a;
+  --line: #cdd4de;
+  --accent: #7a5b0e;
+  --sq-l: #e8e3d2;
+  --sq-d: #587789;
+  --hero-bg: #121a2b;
+  --hero-ink: #f0ece0;
+  --hero-muted: #a9b4c8;
+  --hero-accent: #dcbc62;
+  --pc-w: #fffdf6;
+  --pc-b: #0e131d;
+  --hl: rgba(220, 188, 98, 0.6);
+  --ghost: rgba(20, 27, 42, 0.07);
+  --f-display: "Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1320; --surface: #121929; --card: #172036; --ink: #e8ebf2; --muted: #9aa7be;
+    --line: #2a3550; --accent: #dcbc62; --sq-l: #cfd6dd; --sq-d: #425b6d;
+    --hero-bg: #0a0f1a; --ghost: rgba(232, 235, 242, 0.06);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1320; --surface: #121929; --card: #172036; --ink: #e8ebf2; --muted: #9aa7be;
+  --line: #2a3550; --accent: #dcbc62; --sq-l: #cfd6dd; --sq-d: #425b6d;
+  --hero-bg: #0a0f1a; --ghost: rgba(232, 235, 242, 0.06);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.65;
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+
+.wrap {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--hero-accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.12; margin: 0; }
+p { margin: 0; }
+
+/* Hero */
+.hero { background: var(--hero-bg); color: var(--hero-ink); padding-block: clamp(36px, 7vw, 84px); position: relative; overflow: hidden; }
+.hero::before {
+  content: "\265E\FE0E";
+  position: absolute; right: -2%; bottom: -14%;
+  font-size: clamp(260px, 42vw, 560px); line-height: 1;
+  color: rgba(240, 236, 224, 0.045);
+  pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(28px, 5vw, 64px); align-items: center; position: relative; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hero-accent); }
+.hero h1 { font-size: clamp(2.8rem, 8vw, 5.6rem); font-weight: 900; margin-block: 14px 18px; letter-spacing: -0.01em; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--hero-accent); }
+.hero p.lede { color: var(--hero-muted); font-size: 1.1rem; max-width: 52ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; font-family: var(--f-mono); font-size: 0.8rem; color: var(--hero-muted); }
+.facts b { color: var(--hero-ink); font-weight: 500; }
+.nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 30px; }
+.nav a {
+  font-family: var(--f-mono); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--hero-ink); text-decoration: none;
+  border: 1px solid rgba(240, 236, 224, 0.28); padding: 7px 13px; border-radius: 2px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav a:hover { background: var(--hero-accent); border-color: var(--hero-accent); color: #121a2b; }
+
+/* Checker strip */
+.strip {
+  height: 28px;
+  background: repeating-conic-gradient(var(--sq-d) 0 25%, var(--sq-l) 0 50%) 0 0 / 56px 56px;
+}
+
+/* Board */
+.board-frame { width: 100%; max-width: 480px; margin-inline: auto; padding: 10px; background: #0b1120; border-radius: 3px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35); }
+.board { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); aspect-ratio: 1; width: 100%; container-type: inline-size; }
+.sq { position: relative; display: grid; place-items: center; min-width: 0; min-height: 0; overflow: hidden; }
+.sq.l { background: var(--sq-l); color: var(--sq-d); }
+.sq.d { background: var(--sq-d); color: var(--sq-l); }
+.sq.hl::after, .sq.sel::after { content: ""; position: absolute; inset: 0; background: var(--hl); mix-blend-mode: multiply; pointer-events: none; }
+.sq .rank, .sq .file { position: absolute; font-family: var(--f-mono); font-size: 0.6rem; line-height: 1; font-weight: 500; }
+.sq .rank { top: 3px; left: 3px; }
+.sq .file { bottom: 3px; right: 3px; }
+.pc { font-size: clamp(22px, 6vw, 44px); font-size: 9.4cqw; line-height: 1; position: relative; z-index: 1; }
+.pc.w { color: var(--pc-w); text-shadow: 0 0 1px #0e131d, 0 1px 1px #0e131d, 0 -1px 1px #0e131d, 1px 0 1px #0e131d, -1px 0 1px #0e131d; }
+.pc.b { color: var(--pc-b); text-shadow: 0 0 2px rgba(255, 255, 255, 0.35); }
+
+/* Sections */
+section { padding-block: clamp(44px, 7vw, 88px); position: relative; overflow: hidden; }
+section.alt { background: var(--surface); }
+.sec-head { position: relative; max-width: 760px; margin-bottom: clamp(28px, 4vw, 44px); }
+.sec-head .eyebrow { color: var(--accent); }
+.sec-head h2 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; margin-block: 8px 12px; }
+.sec-head p { color: var(--muted); font-size: 1.05rem; max-width: 62ch; }
+.ghost {
+  position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: clamp(10px, 3vw, 30px);
+  font-size: clamp(120px, 20vw, 260px); line-height: 1; color: var(--ghost); pointer-events: none; user-select: none;
+}
+
+.grid { display: grid; gap: 16px; position: relative; }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.card { background: var(--card); border: 1px solid var(--line); padding: 20px 22px 22px; min-width: 0; }
+.card h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 0.97rem; }
+.card p + p { margin-top: 8px; }
+.card .tip { color: var(--ink); font-size: 0.92rem; padding-top: 10px; margin-top: 12px; border-top: 1px dashed var(--line); }
+.tag { display: inline-block; font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--line); color: var(--muted); padding: 2px 8px; border-radius: 2px; }
+.moves { font-family: var(--f-mono); font-size: 0.86rem; background: var(--bg); border-left: 3px solid var(--accent); padding: 8px 12px; margin: 10px 0 12px; color: var(--ink); overflow-wrap: anywhere; }
+
+/* Pieces */
+.piece { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 18px; align-items: start; }
+.piece .tile { grid-row: span 3; width: 76px; aspect-ratio: 1; display: grid; place-items: center; background: var(--sq-d); color: var(--pc-w); font-size: 3rem; line-height: 1; text-shadow: 0 0 1px #0e131d, 0 2px 2px rgba(0, 0, 0, 0.5); }
+.piece h3 { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.piece .val { font-family: var(--f-mono); font-size: 0.75rem; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+.piece .tip { grid-column: 1 / -1; }
+
+/* Traps stepper */
+.trap { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; margin-top: clamp(36px, 5vw, 56px); position: relative; }
+.trap h3 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 700; margin-bottom: 10px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 14px; }
+.tabs button, .ctrl button {
+  font-family: var(--f-mono); font-size: 0.8rem; letter-spacing: 0.04em; cursor: pointer;
+  background: var(--card); color: var(--ink); border: 1px solid var(--line); padding: 8px 14px; border-radius: 2px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tabs button:hover, .ctrl button:hover:not(:disabled) { border-color: var(--accent); }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.ctrl { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 14px; }
+.ctrl button:disabled { opacity: 0.4; cursor: not-allowed; }
+.caption { min-height: 3.4em; padding: 12px 16px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); font-size: 0.98rem; }
+.mlist { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 14px; align-items: center; font-family: var(--f-mono); font-size: 0.85rem; }
+.mlist .num { color: var(--muted); margin-left: 6px; }
+.mv { font: inherit; background: transparent; color: var(--ink); border: 1px solid transparent; padding: 2px 7px; cursor: pointer; border-radius: 2px; }
+.mv:hover { border-color: var(--line); }
+.mv[aria-current="true"] { background: var(--accent); color: var(--bg); }
+
+/* Players */
+.player { display: flex; flex-direction: column; gap: 6px; }
+.player .yrs { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+.player h3 { margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; position: relative; }
+.chips .lbl { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); align-self: center; margin-right: 6px; }
+.chip { font-family: var(--f-display); font-size: 1.05rem; background: var(--card); border: 1px solid var(--line); padding: 4px 14px; }
+
+/* Links */
+.linkgroup + .linkgroup { margin-top: 34px; }
+.linkgroup h3 { font-size: 1.5rem; margin-bottom: 4px; }
+.linkgroup > p { color: var(--muted); margin-bottom: 14px; }
+.lk { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); padding: 16px 18px; min-width: 0; transition: border-color 0.15s, transform 0.15s; }
+.lk:hover { border-color: var(--accent); transform: translateY(-2px); }
+.lk .nm { font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; }
+.lk .ds { color: var(--muted); font-size: 0.92rem; }
+.lk .dm { font-family: var(--f-mono); font-size: 0.74rem; color: var(--accent); margin-top: 4px; overflow-wrap: anywhere; }
+
+/* Timeline */
+.time { display: grid; gap: 0; position: relative; border-left: 2px solid var(--line); margin-left: 6px; }
+.time li { list-style: none; display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 12px 0 12px 20px; position: relative; }
+.time li::before { content: ""; position: absolute; left: -7px; top: 22px; width: 12px; height: 12px; background: var(--accent); transform: rotate(45deg); }
+.time .yr { font-family: var(--f-mono); font-size: 0.85rem; color: var(--accent); font-weight: 500; }
+.time p { color: var(--ink); }
+ul.time { padding: 0; margin: 0 0 0 6px; }
+
+footer { background: var(--hero-bg); color: var(--hero-muted); padding-block: 36px; font-size: 0.92rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 30px; justify-content: space-between; align-items: center; }
+footer b { font-family: var(--f-display); font-size: 1.3rem; color: var(--hero-ink); font-weight: 700; }
+
+/* Cookie god */
+.cookie { touch-action: manipulation; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.doom { position: fixed; inset: 0; z-index: 9999; background: #000; display: grid; place-items: center; text-align: center; padding-block: 24px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.doom .msg { font-family: var(--f-display); font-weight: 900; font-size: clamp(2rem, 7vw, 4.6rem); line-height: 1.1; color: #d00000; text-shadow: 0 0 22px rgba(208, 0, 0, 0.55); max-width: 18ch; text-wrap: balance; }
+.doom .msg.pop { animation: doomPop 0.3s ease-out; }
+.doom .escape { position: absolute; left: 0; right: 0; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; color: #4a4a4a; }
+.scare { position: fixed; inset: 0; z-index: 10000; background: #0a0000; display: grid; place-items: center; overflow: hidden; }
+.scare svg { width: min(100vw, 100vh); height: min(100vw, 100vh); animation: scareIn 0.14s ease-out, scareShake 0.09s linear 0.14s infinite alternate; }
+@keyframes doomPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes scareIn { from { transform: scale(0.25); } to { transform: scale(1.12); } }
+@keyframes scareShake { from { transform: translate(-7px, 4px) scale(1.12); } to { transform: translate(7px, -4px) scale(1.18); } }
+@media (prefers-reduced-motion: reduce) { .doom .msg.pop, .scare svg { animation: none; } }
+
+/* Play board */
+.board button.sq { border: 0; padding: 0; margin: 0; font: inherit; cursor: pointer; border-radius: 0; -webkit-tap-highlight-color: transparent; }
+.board button.sq:focus-visible { outline: 3px solid var(--hero-accent); outline-offset: -3px; }
+.sq.tgt::before { content: ""; position: absolute; inset: 35%; border-radius: 50%; background: rgba(18, 26, 43, 0.4); z-index: 2; pointer-events: none; }
+.sq.cap::before { content: ""; position: absolute; inset: 6%; border-radius: 50%; border: 4px solid rgba(18, 26, 43, 0.4); z-index: 2; pointer-events: none; }
+.sq.chk { background-image: radial-gradient(circle at center, rgba(214, 69, 65, 0.95) 0%, rgba(214, 69, 65, 0) 72%); }
+.play { display: grid; grid-template-columns: minmax(0, 500px) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; position: relative; }
+.play .caption { margin-bottom: 12px; }
+.side-lbl { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 18px; }
+.side-lbl:first-child { margin-top: 0; }
+.side-lbl b { color: var(--accent); font-weight: 500; }
+.play input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: 10px; }
+.play .note { font-size: 0.88rem; color: var(--muted); margin-top: 8px; }
+.mhist { border: 1px solid var(--line); background: var(--card); padding: 10px 12px; min-height: 96px; max-height: 240px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 2px 10px; align-content: flex-start; font-family: var(--f-mono); font-size: 0.86rem; }
+.mhist .num { color: var(--muted); }
+.mhist .empty { color: var(--muted); }
+@media (max-width: 820px) { .play { grid-template-columns: minmax(0, 1fr); } }
+
+/* Cookie jar */
+.cookie-wrap { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(24px, 5vw, 56px); align-items: center; position: relative; }
+.stage { position: relative; display: grid; place-items: center; padding: 12px 0; }
+.cookie {
+  --ck-body: #d9a566; --ck-edge: #b97a3c; --ck-chip: #4a2a17;
+  background: none; border: 0; padding: 0; cursor: pointer; display: block;
+  width: min(300px, 72vw); aspect-ratio: 1; position: relative;
+  filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.28));
+  -webkit-tap-highlight-color: transparent; transition: transform 0.08s;
+}
+.cookie:active { transform: scale(0.94); }
+.cookie.pop { animation: pop 0.25s ease-out; }
+.cookie[data-type="oat"] { --ck-body: #c99a5b; --ck-edge: #a47238; --ck-chip: #6e3550; }
+.cookie[data-type="sugar"] { --ck-body: #f0d9a8; --ck-edge: #d4b278; --ck-chip: #ee8fa9; }
+.cookie[data-type="double"] { --ck-body: #5a3520; --ck-edge: #3d2314; --ck-chip: #f1e7d6; }
+.cookie svg { width: 100%; height: 100%; display: block; }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(0.92); } 100% { transform: scale(1); } }
+.float { position: absolute; pointer-events: none; font-family: var(--f-mono); font-weight: 500; font-size: 1.1rem; color: var(--accent); animation: rise 0.8s ease-out forwards; }
+@keyframes rise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-64px); } }
+@media (prefers-reduced-motion: reduce) { .cookie.pop { animation: none; } .float { display: none; } }
+.count { font-family: var(--f-display); font-size: clamp(2.8rem, 8vw, 4.4rem); font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+.count-lbl { font-family: var(--f-mono); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.spend { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.spend button { font-family: var(--f-mono); font-size: 0.82rem; cursor: pointer; background: var(--card); color: var(--ink); border: 1px solid var(--line); padding: 9px 16px; border-radius: 2px; transition: border-color 0.15s; }
+.spend button:hover:not(:disabled) { border-color: var(--accent); }
+.spend button:disabled { opacity: 0.4; cursor: not-allowed; }
+.spend-msg { color: var(--muted); font-size: 0.95rem; min-height: 1.6em; }
+.ach { margin-top: 22px; background: var(--card); border: 1px solid var(--line); padding: 16px 18px; }
+.ach.on { border-color: var(--accent); background: var(--surface); }
+.ach .lbl { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.ach.on .lbl { color: var(--accent); }
+.ach .name { font-family: var(--f-display); font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+.bar { height: 10px; background: var(--line); margin-top: 12px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+.ctype { margin-top: 20px; }
+.ctype .lbl { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.credit { flex-basis: 100%; text-align: center; font-family: var(--f-mono); font-size: 0.85rem; color: var(--hero-ink); padding-top: 10px; border-top: 1px solid rgba(240, 236, 224, 0.18); }
+@media (max-width: 820px) { .cookie-wrap { grid-template-columns: minmax(0, 1fr); } }
+
+@media (max-width: 820px) {
+  .hero-grid, .trap { grid-template-columns: minmax(0, 1fr); }
+  .time li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+</style>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">A field guide to the royal game</div>
+        <h1>The Chess <em>Compendium</em></h1>
+        <p class="lede">Learn how the pieces move, meet the great gambits, spot the classic tricks, read about the legends, and find the best places on the web to play.</p>
+        <div class="facts">
+          <span><b>64</b> squares</span>
+          <span><b>32</b> pieces</span>
+          <span><b>~10<sup>120</sup></b> possible games (Shannon's estimate)</span>
+        </div>
+        <nav class="nav" aria-label="Sections">
+          <a href="#pieces">Pieces</a>
+          <a href="#rules">Rules</a>
+          <a href="#gambits">Gambits</a>
+          <a href="#tricks">Tricks</a>
+          <a href="#players">Players</a>
+          <a href="#sites">Websites</a>
+          <a href="#history">History</a>
+          <a href="#play">Play</a>
+        </nav>
+      </div>
+      <div class="board-frame"><div class="board" id="heroBoard" role="img" aria-label="A chessboard in the starting position"></div></div>
+    </div>
+  </div>
+</header>
+<div class="strip" aria-hidden="true"></div>
+
+<section id="pieces">
+  <div class="ghost" aria-hidden="true">&#9819;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The army</div>
+      <h2>Meet the pieces</h2>
+      <p>Each side starts with sixteen: one king, one queen, two rooks, two bishops, two knights and eight pawns. Point values are a rough guide to relative strength, not a rule.</p>
+    </div>
+    <div class="grid g3">
+      <article class="card piece">
+        <div class="tile" aria-hidden="true">&#9818;&#xFE0E;</div>
+        <h3>King <span class="val">Priceless</span></h3>
+        <p>Moves one square in any direction. It can never step onto a square that an enemy piece attacks, and losing it means losing the game.</p>
+        <p></p>
+        <p class="tip">Tuck it away early. In the middlegame it is a target. In the endgame it becomes a fighter.</p>
+      </article>
+      <article class="card piece">
+        <div class="tile" aria-hidden="true">&#9819;&#xFE0E;</div>
+        <h3>Queen <span class="val">9 points</span></h3>
+        <p>Slides any number of squares along a rank, file or diagonal. The most powerful piece on the board.</p>
+        <p></p>
+        <p class="tip">Bring it out too early and the minor pieces will chase it around while you lose time.</p>
+      </article>
+      <article class="card piece">
+        <div class="tile" aria-hidden="true">&#9820;&#xFE0E;</div>
+        <h3>Rook <span class="val">5 points</span></h3>
+        <p>Slides any number of squares along a rank or file. Takes part in castling.</p>
+        <p></p>
+        <p class="tip">Rooks love open files and the seventh rank, and they become strong once the board opens up.</p>
+      </article>
+      <article class="card piece">
+        <div class="tile" aria-hidden="true">&#9821;&#xFE0E;</div>
+        <h3>Bishop <span class="val">3 points</span></h3>
+        <p>Slides along diagonals and stays on one colour of square for the whole game.</p>
+        <p></p>
+        <p class="tip">Two bishops working together cover both colours and are strong in open positions.</p>
+      </article>
+      <article class="card piece">
+        <div class="tile" aria-hidden="true">&#9822;&#xFE0E;</div>
+        <h3>Knight <span class="val">3 points</span></h3>
+        <p>Jumps in an L: two squares one way and one square at a right angle. It is the only piece that can leap over others.</p>
+        <p></p>
+        <p class="tip">Knights shine in crowded positions and on outposts that enemy pawns cannot attack.</p>
+      </article>
+      <article class="card piece">
+        <div class="tile" aria-hidden="true">&#9823;&#xFE0E;</div>
+        <h3>Pawn <span class="val">1 point</span></h3>
+        <p>Moves one square forward, or two from its starting square. Captures one square diagonally forward. Promotes when it reaches the far rank.</p>
+        <p></p>
+        <p class="tip">Pawns never move backward, so every pawn move is a commitment.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="rules" class="alt">
+  <div class="ghost" aria-hidden="true">&#9814;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The laws</div>
+      <h2>Rules of the game</h2>
+      <p>Chess has a few special rules that surprise new players. Learn these nine and you can play a full game.</p>
+    </div>
+    <div class="grid g3">
+      <article class="card"><h3>Setup</h3><p>The board is 8 by 8. Each player has a light square in the right-hand corner. The queen starts on her own colour: the white queen on a light square, the black queen on a dark one. White always moves first.</p></article>
+      <article class="card"><h3>Winning</h3><p>You win by checkmate: the enemy king is attacked and cannot escape. You also win if your opponent resigns or runs out of time.</p></article>
+      <article class="card"><h3>Check</h3><p>A king under attack is in check, and the player must fix it at once. Move the king, block the attack, or capture the attacking piece. A move that leaves your own king in check is illegal.</p></article>
+      <article class="card"><h3>Castling</h3><p>The king moves two squares toward a rook, and the rook jumps to the other side of the king. It is allowed only if neither piece has moved, no pieces stand between them, the king is not in check, and the king does not cross or land on an attacked square.</p></article>
+      <article class="card"><h3>En passant</h3><p>If a pawn advances two squares and lands beside an enemy pawn, that pawn may capture it as if it had moved only one square. This is allowed on the very next move only.</p></article>
+      <article class="card"><h3>Promotion</h3><p>A pawn that reaches the far rank becomes a queen, rook, bishop or knight of the same colour. Most players choose a queen, but choosing a knight is sometimes the winning idea.</p></article>
+      <article class="card"><h3>Touch-move</h3><p>In over-the-board play, if you touch a piece you must move it, and if you touch an enemy piece you must capture it when that is legal. To adjust a piece you say "j'adoube" first.</p></article>
+      <article class="card">
+        <h3>Draws</h3>
+        <p>A game is drawn by stalemate (no legal move and no check), by threefold repetition of a position, by fifty moves by each side with no capture or pawn move, when neither side has enough material to mate, or by agreement.</p>
+      </article>
+      <article class="card">
+        <h3>Time controls</h3>
+        <p>Games are timed. Under FIDE's categories, bullet is under 3 minutes per player, blitz is 3 to 10, rapid is 10 to 60, and classical is longer than that.</p>
+        <p class="tip">Moves are written in algebraic notation: files a to h, ranks 1 to 8. "Nf3" means a knight moves to f3, "x" means capture, "+" check, "#" checkmate, and "O-O" castling.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="gambits">
+  <div class="ghost" aria-hidden="true">&#9817;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Opening theory</div>
+      <h2>Gambits</h2>
+      <p>A gambit is an opening where a player gives up material, usually a pawn, to get faster development, more space or the initiative. The other side may accept the offer or decline it.</p>
+    </div>
+    <div class="grid g3">
+      <article class="card">
+        <span class="tag">Positional</span>
+        <h3 style="margin-top:10px">Queen's Gambit</h3>
+        <div class="moves">1.d4 d5 2.c4</div>
+        <p>White offers the c-pawn to pull Black's d-pawn away from the centre. If Black accepts, White usually wins the pawn back, so it is a gambit mostly in name. It is among the most respected openings at every level, and the 2020 TV series of the same name brought it to a wide new audience.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Sharp attack</span>
+        <h3 style="margin-top:10px">King's Gambit</h3>
+        <div class="moves">1.e4 e5 2.f4</div>
+        <p>White gives the f-pawn for open lines against Black's king and a strong centre. It was the romantic favourite of the 19th century, and world champion Boris Spassky kept it alive in top-level games.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Attacking</span>
+        <h3 style="margin-top:10px">Evans Gambit</h3>
+        <div class="moves">1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.b4</div>
+        <p>White sacrifices a wing pawn so that c3 and d4 can follow with tempo. Garry Kasparov brought it back to the top level when he played it against Viswanathan Anand in 1995.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Practical</span>
+        <h3 style="margin-top:10px">Smith-Morra Gambit</h3>
+        <div class="moves">1.e4 c5 2.d4 cxd4 3.c3</div>
+        <p>A popular weapon against the Sicilian Defence. White trades a pawn for quick development and open lines, and can often play on instinct while Black has to find accurate moves.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Sharp attack</span>
+        <h3 style="margin-top:10px">Danish Gambit</h3>
+        <div class="moves">1.e4 e5 2.d4 exd4 3.c3</div>
+        <p>White may give up two pawns to get both bishops pointing at Black's kingside. It is fast and fun, and Black has to know the safe path through the complications.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Counter-gambit</span>
+        <h3 style="margin-top:10px">Budapest Gambit</h3>
+        <div class="moves">1.d4 Nf6 2.c4 e5</div>
+        <p>Black answers White's queen-pawn opening by offering a pawn at once. After 3.dxe5 Ng4 Black hunts for the pawn back with active pieces and a few well-known traps.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Trappy</span>
+        <h3 style="margin-top:10px">Englund Gambit</h3>
+        <div class="moves">1.d4 e5</div>
+        <p>Black sacrifices a pawn on the very first move. It has some famous traps for careless opponents, but it is risky against accurate play.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Long-term pressure</span>
+        <h3 style="margin-top:10px">Benko Gambit</h3>
+        <div class="moves">1.d4 Nf6 2.c4 c5 3.d5 b5</div>
+        <p>Black gives a pawn on the queenside for open files and diagonals that pressure White for the rest of the game, even in the endgame.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="tricks" class="alt">
+  <div class="ghost" aria-hidden="true">&#9816;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Tactics</div>
+      <h2>Tricks and tactics</h2>
+      <p>Most games below master level are decided by tactics: short sequences that win material or checkmate. Learn the patterns and you will start seeing them everywhere.</p>
+    </div>
+    <div class="grid g3">
+      <article class="card"><h3>Fork</h3><p>One piece attacks two or more targets at the same time. Knights are the classic forkers because enemy pieces seldom see them coming. A knight fork on a king and queen wins the queen.</p></article>
+      <article class="card"><h3>Pin</h3><p>A piece cannot move without exposing a more valuable piece behind it. If the piece behind is the king, the pinned piece is not allowed to move at all.</p></article>
+      <article class="card"><h3>Skewer</h3><p>The reverse of a pin. A valuable piece is attacked and must move away, which exposes a less valuable piece on the same line.</p></article>
+      <article class="card"><h3>Discovered attack</h3><p>Move one piece to uncover an attack by another. When the uncovered attack is a check, the moving piece can also do something else, and the opponent may lose a lot.</p></article>
+      <article class="card"><h3>Double check</h3><p>Two pieces give check at once. Blocking or capturing cannot answer both, so the king has to move.</p></article>
+      <article class="card"><h3>Back-rank mate</h3><p>A king stuck behind its own pawns on the first rank is mated by a rook or queen. Giving the king an escape square with a pawn move, called "luft", prevents it.</p></article>
+      <article class="card"><h3>Deflection and decoy</h3><p>Deflection forces a defender away from the square or piece it guards. A decoy lures an enemy piece onto a square where it can be attacked or where it blocks its own side.</p></article>
+      <article class="card"><h3>Zwischenzug</h3><p>German for "in-between move". Instead of making the expected recapture, you insert a stronger move first, often a check, and the position changes in your favour.</p></article>
+      <article class="card"><h3>Smothered mate</h3><p>A knight checks a king that is surrounded by its own pieces. It often follows a queen sacrifice that forces the king into the corner.</p></article>
+    </div>
+
+    <div class="trap">
+      <div class="board-frame" style="margin-inline:0">
+        <div class="board" id="trapBoard" role="img" aria-label="Chessboard showing the selected trap"></div>
+      </div>
+      <div>
+        <div class="eyebrow" style="color:var(--accent)">Play it through</div>
+        <h3>Three famous traps</h3>
+        <p style="color:var(--muted)">Pick a game and step through it. Each move is highlighted on the board. You can also tap any move in the list.</p>
+        <div class="tabs" id="tabs">
+          <button type="button" data-game="scholar" aria-pressed="true">Scholar's mate</button>
+          <button type="button" data-game="fool" aria-pressed="false">Fool's mate</button>
+          <button type="button" data-game="legall" aria-pressed="false">Legall's mate</button>
+        </div>
+        <div class="caption" id="caption" aria-live="polite"></div>
+        <div class="ctrl">
+          <button type="button" id="restart">Restart</button>
+          <button type="button" id="back">Back</button>
+          <button type="button" id="next">Next</button>
+        </div>
+        <div class="mlist" id="mlist"></div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-top:36px">
+      <article class="card">
+        <h3>Before every move</h3>
+        <p>Ask three questions: what checks can my opponent make, what captures, and what threats? Then look at the same three for yourself. This simple habit stops most blunders.</p>
+      </article>
+      <article class="card">
+        <h3>Opening habits</h3>
+        <p>Fight for the centre, develop your knights and bishops, castle early, and avoid moving the same piece twice or bringing the queen out too soon.</p>
+      </article>
+      <article class="card">
+        <h3>Train daily</h3>
+        <p>Solving ten puzzles a day builds pattern recognition faster than playing endless games. Every site in the list below has a puzzle section.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="players">
+  <div class="ghost" aria-hidden="true">&#9812;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Hall of fame</div>
+      <h2>Famous players</h2>
+      <p>From the first official champion to today's young stars, these are names every chess player should know.</p>
+    </div>
+    <div class="grid g4">
+      <article class="card player"><span class="yrs">1837 to 1884 &middot; USA</span><h3>Paul Morphy</h3><p>Toured Europe in the 1850s and beat the best players of his day with fast development and daring attacks. His Opera Game from 1858 is still taught to beginners.</p></article>
+      <article class="card player"><span class="yrs">1836 to 1900 &middot; Austria</span><h3>Wilhelm Steinitz</h3><p>The first official World Champion, crowned in 1886. He taught that small advantages build up and should be played for patiently.</p></article>
+      <article class="card player"><span class="yrs">1888 to 1942 &middot; Cuba</span><h3>Jos&eacute; Ra&uacute;l Capablanca</h3><p>World Champion from 1921 to 1927. Known for smooth, clear technique, especially in endgames.</p></article>
+      <article class="card player"><span class="yrs">1936 to 1992 &middot; Latvia</span><h3>Mikhail Tal</h3><p>The Magician from Riga. He became World Champion in 1960 at 23, thrilling crowds with wild sacrifices.</p></article>
+      <article class="card player"><span class="yrs">1943 to 2008 &middot; USA</span><h3>Bobby Fischer</h3><p>Beat Boris Spassky in Reykjavik in 1972 to become World Champion, ending a long run of Soviet title holders.</p></article>
+      <article class="card player"><span class="yrs">Born 1951 &middot; Russia</span><h3>Anatoly Karpov</h3><p>World Champion from 1975 to 1985. He squeezed opponents with quiet positional play and won a huge number of tournaments.</p></article>
+      <article class="card player"><span class="yrs">Born 1963 &middot; Russia</span><h3>Garry Kasparov</h3><p>World Champion from 1985 to 2000. His 1997 match loss to IBM's Deep Blue was a landmark moment for computers in chess.</p></article>
+      <article class="card player"><span class="yrs">Born 1969 &middot; India</span><h3>Viswanathan Anand</h3><p>Five-time World Champion and India's first grandmaster, in 1988. He inspired a whole generation of Indian players.</p></article>
+      <article class="card player"><span class="yrs">Born 1976 &middot; Hungary</span><h3>Judit Polg&aacute;r</h3><p>The strongest woman player in history. She reached world number 8 and beat Garry Kasparov in 2002.</p></article>
+      <article class="card player"><span class="yrs">Born 1990 &middot; Norway</span><h3>Magnus Carlsen</h3><p>World Champion from 2013 to 2023. He holds the highest rating ever recorded, 2882.</p></article>
+      <article class="card player"><span class="yrs">Born 2006 &middot; India</span><h3>D. Gukesh</h3><p>Became the youngest undisputed World Champion in 2024, at age 18.</p></article>
+      <article class="card player"><span class="yrs">Born 2005 &middot; India</span><h3>R. Praggnanandhaa</h3><p>Reached the final of the 2023 World Cup, where he lost to Magnus Carlsen in the tiebreaks.</p></article>
+    </div>
+    <div class="chips">
+      <span class="lbl">Also worth knowing</span>
+      <span class="chip">Boris Spassky</span>
+      <span class="chip">Vera Menchik</span>
+      <span class="chip">Hou Yifan</span>
+      <span class="chip">Koneru Humpy</span>
+      <span class="chip">Hikaru Nakamura</span>
+      <span class="chip">Fabiano Caruana</span>
+      <span class="chip">Ding Liren</span>
+      <span class="chip">Alireza Firouzja</span>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="sites" class="alt">
+  <div class="ghost" aria-hidden="true">&#9820;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Go further</div>
+      <h2>Chess websites</h2>
+      <p>Places to play, study, look up historic games and follow the official world of chess. Links open in a new tab.</p>
+    </div>
+
+    <div class="linkgroup">
+      <h3>Play online</h3>
+      <p>Find an opponent at any hour, from a quick bullet game to a long classical one.</p>
+      <div class="grid g3">
+        <a class="lk" href="https://www.chess.com" target="_blank" rel="noopener"><span class="nm">Chess.com</span><span class="ds">The largest chess site. Play, take lessons, solve puzzles and watch top events.</span><span class="dm">chess.com</span></a>
+        <a class="lk" href="https://lichess.org" target="_blank" rel="noopener"><span class="nm">Lichess</span><span class="ds">Free, open-source and ad-free, with a huge puzzle set and tools for analysing your own games.</span><span class="dm">lichess.org</span></a>
+      </div>
+    </div>
+
+    <div class="linkgroup">
+      <h3>Learn and train</h3>
+      <p>Courses and tactics trainers for every level.</p>
+      <div class="grid g3">
+        <a class="lk" href="https://www.chessable.com" target="_blank" rel="noopener"><span class="nm">Chessable</span><span class="ds">Opening and endgame courses that use spaced repetition to help you remember the moves.</span><span class="dm">chessable.com</span></a>
+        <a class="lk" href="https://chesstempo.com" target="_blank" rel="noopener"><span class="nm">ChessTempo</span><span class="ds">Tactics training with ratings, plus a large game database and opening explorer.</span><span class="dm">chesstempo.com</span></a>
+        <a class="lk" href="https://en.wikipedia.org/wiki/Chess" target="_blank" rel="noopener"><span class="nm">Wikipedia: Chess</span><span class="ds">A thorough reference on rules, history, strategy and notation.</span><span class="dm">en.wikipedia.org</span></a>
+      </div>
+    </div>
+
+    <div class="linkgroup">
+      <h3>Databases and news</h3>
+      <p>Read the games of the legends and keep up with the chess world.</p>
+      <div class="grid g3">
+        <a class="lk" href="https://www.chessgames.com" target="_blank" rel="noopener"><span class="nm">Chessgames.com</span><span class="ds">A huge searchable archive of historic games, player pages and community discussion.</span><span class="dm">chessgames.com</span></a>
+        <a class="lk" href="https://chessbase.com" target="_blank" rel="noopener"><span class="nm">ChessBase</span><span class="ds">Chess software and news, with reports from major tournaments.</span><span class="dm">chessbase.com</span></a>
+        <a class="lk" href="https://theweekinchess.com" target="_blank" rel="noopener"><span class="nm">The Week in Chess</span><span class="ds">A weekly roundup of tournaments and results from around the world.</span><span class="dm">theweekinchess.com</span></a>
+      </div>
+    </div>
+
+    <div class="linkgroup">
+      <h3>Federations</h3>
+      <p>The official bodies that run ratings, titles and championships.</p>
+      <div class="grid g3">
+        <a class="lk" href="https://www.fide.com" target="_blank" rel="noopener"><span class="nm">FIDE</span><span class="ds">The world chess federation. Official rules, ratings, titles and world championship events.</span><span class="dm">fide.com</span></a>
+        <a class="lk" href="https://aicf.in" target="_blank" rel="noopener"><span class="nm">All India Chess Federation</span><span class="ds">The national body for chess in India, covering tournaments and player information.</span><span class="dm">aicf.in</span></a>
+        <a class="lk" href="https://www.uschess.org" target="_blank" rel="noopener"><span class="nm">US Chess Federation</span><span class="ds">The national federation of the United States, with ratings and event listings.</span><span class="dm">uschess.org</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="history">
+  <div class="ghost" aria-hidden="true">&#9813;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Timeline</div>
+      <h2>A short history</h2>
+      <p>Chess is about fifteen centuries old and has changed a lot on the way.</p>
+    </div>
+    <ul class="time">
+      <li><span class="yr">c. 6th century</span><p>Chaturanga, an Indian game with the four divisions of an army, appears. It is the ancestor of chess.</p></li>
+      <li><span class="yr">Later centuries</span><p>The game spreads through Persia as shatranj, then across the Islamic world and into Europe.</p></li>
+      <li><span class="yr">c. 1475</span><p>The queen and bishop gain their modern long-range moves in southern Europe. The game becomes much faster and looks like today's chess.</p></li>
+      <li><span class="yr">1851</span><p>The first international tournament takes place in London, and Adolf Anderssen wins.</p></li>
+      <li><span class="yr">1886</span><p>Wilhelm Steinitz becomes the first official World Champion.</p></li>
+      <li><span class="yr">1924</span><p>FIDE, the international chess federation, is founded in Paris.</p></li>
+      <li><span class="yr">1972</span><p>Bobby Fischer defeats Boris Spassky in Reykjavik.</p></li>
+      <li><span class="yr">1997</span><p>IBM's Deep Blue beats Garry Kasparov in a six-game match.</p></li>
+      <li><span class="yr">2024</span><p>D. Gukesh becomes the youngest undisputed World Champion, at age 18.</p></li>
+    </ul>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="play" class="alt">
+  <div class="ghost" aria-hidden="true">&#9812;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Your move</div>
+      <h2>Play a game</h2>
+      <p>Play against a bot between about 500 and 1500 Elo, or share the board with a friend. The bot runs in your browser, so there is nothing to sign up for.</p>
+    </div>
+    <div class="play">
+      <div>
+        <div class="caption" id="plStatus" aria-live="polite">White to move.</div>
+        <div class="board-frame" style="margin-inline:0">
+          <div class="board" id="playBoard" role="group" aria-label="Chessboard. Select a piece, then select a square to move it."></div>
+        </div>
+        <div class="tabs" id="plPromo" hidden>
+          <span class="side-lbl" style="margin:0 6px 0 0">Promote to</span>
+          <button type="button" data-p="5">Queen</button>
+          <button type="button" data-p="4">Rook</button>
+          <button type="button" data-p="3">Bishop</button>
+          <button type="button" data-p="2">Knight</button>
+        </div>
+      </div>
+      <div>
+        <div class="side-lbl">Mode</div>
+        <div class="tabs" id="plModes">
+          <button type="button" data-mode="bot" aria-pressed="true">Play the bot</button>
+          <button type="button" data-mode="two" aria-pressed="false">Two players</button>
+        </div>
+        <div id="plBotOpts">
+          <div class="side-lbl"><label for="plElo">Bot strength: about <b id="plEloVal">1000</b> Elo</label></div>
+          <input type="range" id="plElo" min="500" max="1500" step="100" value="1000">
+          <p class="note">Elo is approximate. Weaker settings look fewer moves ahead and make more mistakes.</p>
+          <div class="side-lbl">You play</div>
+          <div class="tabs" id="plSides">
+            <button type="button" data-side="1" aria-pressed="true">White</button>
+            <button type="button" data-side="-1" aria-pressed="false">Black</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <button type="button" id="plNew">New game</button>
+          <button type="button" id="plUndo">Undo</button>
+          <button type="button" id="plFlip">Flip board</button>
+        </div>
+        <div class="side-lbl">Moves</div>
+        <div class="mhist" id="plHist"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<section id="cookie">
+  <div class="ghost" aria-hidden="true">&#9823;&#xFE0E;</div>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Take a break</div>
+      <h2>The cookie jar</h2>
+      <p>Click the cookie to collect chocolate chips. They are saved in this browser. You can spend them on absolutely nothing.</p>
+    </div>
+    <div class="cookie-wrap">
+      <div class="stage" id="stage">
+        <button type="button" class="cookie" id="cookieBtn" data-type="choc" aria-label="Click the cookie to collect a chocolate chip">
+          <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+            <circle cx="100" cy="100" r="93" fill="var(--ck-edge)"/>
+            <circle cx="100" cy="100" r="86" fill="var(--ck-body)"/>
+            <path d="M40 74 A64 64 0 0 1 88 30" stroke="rgba(255,255,255,0.35)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <g fill="var(--ck-chip)">
+              <ellipse cx="66" cy="64" rx="12" ry="8" transform="rotate(-20 66 64)"/>
+              <ellipse cx="124" cy="52" rx="10" ry="7" transform="rotate(25 124 52)"/>
+              <ellipse cx="150" cy="96" rx="11" ry="8" transform="rotate(-10 150 96)"/>
+              <ellipse cx="98" cy="100" rx="12" ry="8" transform="rotate(15 98 100)"/>
+              <ellipse cx="58" cy="112" rx="10" ry="7" transform="rotate(30 58 112)"/>
+              <ellipse cx="132" cy="140" rx="12" ry="8" transform="rotate(-25 132 140)"/>
+              <ellipse cx="92" cy="146" rx="10" ry="7" transform="rotate(10 92 146)"/>
+              <ellipse cx="84" cy="74" rx="6" ry="4.5"/>
+              <ellipse cx="116" cy="118" rx="6" ry="4.5"/>
+              <ellipse cx="148" cy="124" rx="5" ry="4"/>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <div>
+        <div class="count" id="chipCount">0</div>
+        <div class="count-lbl">Chocolate chips &middot; earned in total: <span id="earned">0</span></div>
+        <div class="spend">
+          <button type="button" id="spend">Spend 10 chips on nothing</button>
+          <span class="spend-msg" id="spendMsg" aria-live="polite">Nothing is for sale, and it costs 10 chips.</span>
+        </div>
+        <div class="ach" id="ach">
+          <div class="lbl" id="achLbl">Achievement locked</div>
+          <div class="name" id="achName">Collect 100 chocolate chips</div>
+          <div class="bar" aria-hidden="true"><i id="achBar"></i></div>
+        </div>
+        <div class="ctype">
+          <div class="lbl">Cookie type</div>
+          <div class="tabs" id="ctypes">
+            <button type="button" data-type="choc" aria-pressed="true">Chocolate chip</button>
+            <button type="button" data-type="oat" aria-pressed="false">Oatmeal raisin</button>
+            <button type="button" data-type="sugar" aria-pressed="false">Sprinkle sugar</button>
+            <button type="button" data-type="double" aria-pressed="false">Double chocolate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+<footer>
+  <div class="wrap">
+    <b>The Chess Compendium</b>
+    <span>Every master was once a beginner. <a href="#top" style="color:var(--hero-accent)">Back to the top</a></span>
+    <span class="credit">~created by Nidheesh Pathak</span>
+  </div>
+</footer>
+
+<div class="doom" id="doom" hidden role="alertdialog" aria-live="assertive" aria-label="The cookie god is angry">
+  <div class="msg" id="doomMsg"></div>
+  <div class="escape">tap anywhere or press Esc to leave</div>
+</div>
+<div class="scare" id="scare" hidden aria-hidden="true">
+  <svg viewBox="0 0 400 400" focusable="false">
+    <defs>
+      <radialGradient id="scareGlow" cx="50%" cy="50%" r="65%"><stop offset="0" stop-color="#7a0000"/><stop offset="1" stop-color="#0a0000"/></radialGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#scareGlow)"/>
+    <path d="M140 96 L148 42 L174 72 L200 26 L226 72 L252 42 L260 96 Z" fill="#d9b85c" stroke="#5a430a" stroke-width="4" stroke-linejoin="round"/>
+    <ellipse cx="200" cy="218" rx="128" ry="148" fill="#e6e0cc" stroke="#241a10" stroke-width="5"/>
+    <ellipse cx="148" cy="176" rx="37" ry="49" fill="#0a0a0a"/>
+    <ellipse cx="252" cy="176" rx="37" ry="49" fill="#0a0a0a"/>
+    <circle cx="148" cy="184" r="9" fill="#fff"/>
+    <circle cx="252" cy="184" r="9" fill="#fff"/>
+    <path d="M100 122 L186 148" stroke="#0a0a0a" stroke-width="14" stroke-linecap="round"/>
+    <path d="M300 122 L214 148" stroke="#0a0a0a" stroke-width="14" stroke-linecap="round"/>
+    <ellipse cx="189" cy="226" rx="7" ry="11" fill="#2a2018"/>
+    <ellipse cx="211" cy="226" rx="7" ry="11" fill="#2a2018"/>
+    <ellipse cx="200" cy="304" rx="58" ry="62" fill="#1a0000" stroke="#241a10" stroke-width="5"/>
+    <path d="M158 262 L242 262 L236 286 L164 286 Z" fill="#f4efe0"/>
+    <ellipse cx="200" cy="344" rx="34" ry="18" fill="#b3202a"/>
+  </svg>
+</div>
+
+<script>
+(function () {
+  var GLYPH = { K: "♚", Q: "♛", R: "♜", B: "♝", N: "♞", P: "♟" };
+  var START = ["rnbqkbnr", "pppppppp", "........", "........", "........", "........", "PPPPPPPP", "RNBQKBNR"];
+
+  function parse(rows) { return rows.map(function (r) { return r.split(""); }); }
+  function copy(b) { return b.map(function (r) { return r.slice(); }); }
+  function sqIdx(n) { return [8 - parseInt(n.charAt(1), 10), n.charCodeAt(0) - 97]; }
+
+  function buildBoard(el) {
+    el.innerHTML = "";
+    var cells = [];
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        var d = document.createElement("div");
+        d.className = "sq " + ((r + c) % 2 === 0 ? "l" : "d");
+        if (c === 0) { var k = document.createElement("span"); k.className = "rank"; k.textContent = String(8 - r); d.appendChild(k); }
+        if (r === 7) { var f = document.createElement("span"); f.className = "file"; f.textContent = String.fromCharCode(97 + c); d.appendChild(f); }
+        var p = document.createElement("span"); p.className = "pc"; d.appendChild(p);
+        el.appendChild(d);
+        cells.push(d);
+      }
+    }
+    return cells;
+  }
+
+  function paint(cells, board, from, to) {
+    for (var r = 0; r < 8; r++) {
+      for (var c = 0; c < 8; c++) {
+        var cell = cells[r * 8 + c];
+        var pc = cell.querySelector(".pc");
+        var p = board[r][c];
+        if (p === ".") { pc.textContent = ""; pc.className = "pc"; }
+        else {
+          pc.textContent = GLYPH[p.toUpperCase()] + "︎";
+          pc.className = "pc " + (p === p.toUpperCase() ? "w" : "b");
+        }
+        var hot = (from && from[0] === r && from[1] === c) || (to && to[0] === r && to[1] === c);
+        cell.classList.toggle("hl", !!hot);
+      }
+    }
+  }
+
+  var heroCells = buildBoard(document.getElementById("heroBoard"));
+  paint(heroCells, parse(START));
+
+  var GAMES = {
+    scholar: {
+      note: "Scholar's mate: the quickest trap beginners meet. Press Next to play it from the start.",
+      moves: ["e2e4", "e7e5", "d1h5", "b8c6", "f1c4", "g8f6", "h5f7"],
+      san: ["e4", "e5", "Qh5", "Nc6", "Bc4", "Nf6", "Qxf7#"],
+      cap: [
+        "White claims the centre and opens lines for the queen and bishop.",
+        "Black copies the move and claims the centre too.",
+        "The queen comes out early and eyes both e5 and f7.",
+        "Black defends e5, but forgets about f7.",
+        "The bishop joins the queen. Both now aim at f7, which only the king guards.",
+        "Black attacks the queen but ignores the threat. 3...g6 would have kept the game going.",
+        "Queen takes f7 with the bishop's support. Checkmate on move 4."
+      ]
+    },
+    fool: {
+      note: "Fool's mate: the shortest possible game. Press Next to play it from the start.",
+      moves: ["f2f3", "e7e5", "g2g4", "d8h4"],
+      san: ["f3", "e5", "g4", "Qh4#"],
+      cap: [
+        "White's first move weakens the diagonal that leads to the king.",
+        "Black takes a share of the centre and opens the diagonal for the queen.",
+        "White opens the diagonal further. This is a blunder.",
+        "Queen to h4 is checkmate, after only two moves each."
+      ]
+    },
+    legall: {
+      note: "Legall's mate: a queen sacrifice that ends in a mate with minor pieces. Press Next to play it from the start.",
+      moves: ["e2e4", "e7e5", "g1f3", "d7d6", "f1c4", "c8g4", "b1c3", "g7g6", "f3e5", "g4d1", "c4f7", "e8e7", "c3d5"],
+      san: ["e4", "e5", "Nf3", "d6", "Bc4", "Bg4", "Nc3", "g6", "Nxe5", "Bxd1", "Bxf7+", "Ke7", "Nd5#"],
+      cap: [
+        "White starts with the king's pawn.",
+        "Black answers symmetrically.",
+        "The knight develops and attacks e5.",
+        "Black defends e5 with a pawn.",
+        "The bishop eyes f7.",
+        "Black pins the knight on f3 to White's queen. Greedy play is about to follow.",
+        "White develops another knight.",
+        "Black plays a loose move, hoping to win material.",
+        "The bait: White lets the queen be captured on purpose.",
+        "Black takes the queen, and the trap is set.",
+        "The bishop captures f7 with check.",
+        "The king has to step to e7.",
+        "Checkmate with minor pieces only. The knights and the bishop cover every escape square."
+      ]
+    }
+  };
+
+  (function buildPositions() {
+    Object.keys(GAMES).forEach(function (k) {
+      var g = GAMES[k];
+      var cur = parse(START);
+      g.pos = [cur];
+      g.moves.forEach(function (m) {
+        var f = sqIdx(m.slice(0, 2)), t = sqIdx(m.slice(2, 4));
+        cur = copy(cur);
+        cur[t[0]][t[1]] = cur[f[0]][f[1]];
+        cur[f[0]][f[1]] = ".";
+        g.pos.push(cur);
+      });
+    });
+  })();
+
+  var trapCells = buildBoard(document.getElementById("trapBoard"));
+  var key = "scholar";
+  var ply = GAMES.scholar.moves.length;
+  var capEl = document.getElementById("caption");
+  var listEl = document.getElementById("mlist");
+  var backBtn = document.getElementById("back");
+  var nextBtn = document.getElementById("next");
+  var restartBtn = document.getElementById("restart");
+  var tabs = document.querySelectorAll("#tabs button");
+
+  function render() {
+    var g = GAMES[key];
+    var from = ply > 0 ? sqIdx(g.moves[ply - 1].slice(0, 2)) : null;
+    var to = ply > 0 ? sqIdx(g.moves[ply - 1].slice(2, 4)) : null;
+    paint(trapCells, g.pos[ply], from, to);
+    capEl.textContent = ply === 0 ? g.note : g.cap[ply - 1];
+    backBtn.disabled = ply === 0;
+    nextBtn.disabled = ply === g.moves.length;
+    restartBtn.disabled = ply === 0;
+    listEl.innerHTML = "";
+    g.san.forEach(function (s, i) {
+      if (i % 2 === 0) {
+        var n = document.createElement("span");
+        n.className = "num";
+        n.textContent = String(i / 2 + 1) + ".";
+        listEl.appendChild(n);
+      }
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "mv";
+      b.textContent = s;
+      b.setAttribute("data-ply", String(i + 1));
+      b.setAttribute("aria-current", ply === i + 1 ? "true" : "false");
+      listEl.appendChild(b);
+    });
+    tabs.forEach(function (t) { t.setAttribute("aria-pressed", t.getAttribute("data-game") === key ? "true" : "false"); });
+  }
+
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () {
+      key = t.getAttribute("data-game");
+      ply = GAMES[key].moves.length;
+      render();
+    });
+  });
+  backBtn.addEventListener("click", function () { if (ply > 0) { ply--; render(); } });
+  nextBtn.addEventListener("click", function () { if (ply < GAMES[key].moves.length) { ply++; render(); } });
+  restartBtn.addEventListener("click", function () { ply = 0; render(); });
+  listEl.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute("data-ply")) { ply = parseInt(t.getAttribute("data-ply"), 10); render(); }
+  });
+
+  render();
+
+  /* Cookie jar */
+  var STORE = "chessCompendiumCookie";
+  var TYPES = ["choc", "oat", "sugar", "double"];
+  var NOTHING = [
+    "You bought nothing. It arrived instantly.",
+    "Nothing purchased. No receipt needed.",
+    "Nothing delivered. Excellent choice.",
+    "More nothing. You are getting good at this."
+  ];
+  var ck = { chips: 0, earned: 0, spent: 0, type: "choc" };
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORE) || "null");
+    if (saved && typeof saved.chips === "number" && typeof saved.earned === "number") {
+      ck.chips = Math.max(0, Math.floor(saved.chips));
+      ck.earned = Math.max(0, Math.floor(saved.earned));
+      ck.spent = typeof saved.spent === "number" ? Math.max(0, Math.floor(saved.spent)) : 0;
+      if (TYPES.indexOf(saved.type) !== -1) ck.type = saved.type;
+    }
+  } catch (e) {}
+  function ckSave() { try { localStorage.setItem(STORE, JSON.stringify(ck)); } catch (e) {} }
+
+  var cookieBtn = document.getElementById("cookieBtn");
+  var stage = document.getElementById("stage");
+  var chipEl = document.getElementById("chipCount");
+  var earnedEl = document.getElementById("earned");
+  var spendBtn = document.getElementById("spend");
+  var spendMsg = document.getElementById("spendMsg");
+  var achEl = document.getElementById("ach");
+  var achLbl = document.getElementById("achLbl");
+  var achName = document.getElementById("achName");
+  var achBar = document.getElementById("achBar");
+  var typeBtns = document.querySelectorAll("#ctypes button");
+
+  function ckRender() {
+    chipEl.textContent = String(ck.chips);
+    earnedEl.textContent = String(ck.earned);
+    spendBtn.disabled = ck.chips < 10;
+    var done = ck.earned >= 100;
+    achEl.classList.toggle("on", done);
+    achLbl.textContent = done ? "Achievement unlocked" : "Achievement locked";
+    achName.textContent = done ? "No work to do, don't you?" : "Collect 100 chocolate chips";
+    achBar.style.width = Math.min(100, ck.earned) + "%";
+    cookieBtn.setAttribute("data-type", ck.type);
+    typeBtns.forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-type") === ck.type ? "true" : "false"); });
+  }
+
+  cookieBtn.addEventListener("click", function (e) {
+    if (holdFired) { holdFired = false; return; }
+    ck.chips++;
+    ck.earned++;
+    ckSave();
+    ckRender();
+    cookieBtn.classList.remove("pop");
+    void cookieBtn.offsetWidth;
+    cookieBtn.classList.add("pop");
+    var rect = stage.getBoundingClientRect();
+    var x = e.detail === 0 ? rect.width / 2 : e.clientX - rect.left;
+    var y = e.detail === 0 ? rect.height / 2 : e.clientY - rect.top;
+    var f = document.createElement("span");
+    f.className = "float";
+    f.textContent = "+1";
+    f.style.left = x + "px";
+    f.style.top = y + "px";
+    stage.appendChild(f);
+    setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 800);
+  });
+
+  spendBtn.addEventListener("click", function () {
+    if (ck.chips < 10) return;
+    ck.chips -= 10;
+    ck.spent += 10;
+    ckSave();
+    spendMsg.textContent = NOTHING[(ck.spent / 10 - 1) % NOTHING.length] + " Total spent on nothing: " + ck.spent + ".";
+    ckRender();
+  });
+
+  typeBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      ck.type = b.getAttribute("data-type");
+      ckSave();
+      ckRender();
+    });
+  });
+
+  ckRender();
+
+  /* The cookie god: hold the cookie for 3 seconds */
+  var holdTimer = null, holdFired = false, doomActive = false, doomTimers = [], doomShownAt = 0;
+  var audio = null, screamNodes = [], screamGain = null;
+  var doomEl = document.getElementById("doom");
+  var doomMsg = document.getElementById("doomMsg");
+  var scareEl = document.getElementById("scare");
+  var W = typeof window !== "undefined" ? window : {};
+
+  function prepAudio() {
+    try {
+      var AC = W.AudioContext || W.webkitAudioContext;
+      if (!AC) return;
+      if (!audio) audio = new AC();
+      if (audio.state === "suspended") audio.resume();
+    } catch (e) {}
+  }
+
+  function scream() {
+    try {
+      if (!audio) return;
+      var a = audio, t = a.currentTime, dur = 1.7;
+      screamGain = a.createGain();
+      screamGain.gain.setValueAtTime(0.0001, t);
+      screamGain.gain.linearRampToValueAtTime(0.3, t + 0.03);
+      screamGain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      screamGain.connect(a.destination);
+      [[640, 1500, "sawtooth"], [960, 2100, "square"]].forEach(function (cfg) {
+        var o = a.createOscillator(), lfo = a.createOscillator(), lg = a.createGain();
+        o.type = cfg[2];
+        o.frequency.setValueAtTime(cfg[0], t);
+        o.frequency.exponentialRampToValueAtTime(cfg[1], t + 0.25);
+        o.frequency.exponentialRampToValueAtTime(cfg[1] * 0.75, t + dur);
+        lfo.frequency.value = 14;
+        lg.gain.value = 70;
+        lfo.connect(lg);
+        lg.connect(o.frequency);
+        o.connect(screamGain);
+        o.start(t); lfo.start(t);
+        o.stop(t + dur + 0.05); lfo.stop(t + dur + 0.05);
+        screamNodes.push(o, lfo);
+      });
+      var len = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, len, a.sampleRate), data = buf.getChannelData(0), i;
+      for (i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
+      var ns = a.createBufferSource(), bp = a.createBiquadFilter(), ng = a.createGain();
+      ns.buffer = buf;
+      bp.type = "bandpass"; bp.frequency.value = 1800; bp.Q.value = 0.8;
+      ng.gain.value = 0.5;
+      ns.connect(bp); bp.connect(ng); ng.connect(screamGain);
+      ns.start(t);
+      screamNodes.push(ns);
+    } catch (e) {}
+  }
+
+  function stopScream() {
+    try { if (screamGain && audio) { screamGain.gain.cancelScheduledValues(0); screamGain.gain.setValueAtTime(0.0001, audio.currentTime); } } catch (e) {}
+    screamNodes.forEach(function (n) { try { n.stop(); } catch (e) {} });
+    screamNodes = [];
+    screamGain = null;
+  }
+
+  function showDoomMsg(t) {
+    doomMsg.textContent = t;
+    doomMsg.classList.remove("pop");
+    void doomMsg.offsetWidth;
+    doomMsg.classList.add("pop");
+  }
+
+  function endDoom() {
+    doomTimers.forEach(function (id) { clearTimeout(id); });
+    doomTimers = [];
+    doomActive = false;
+    doomEl.hidden = true;
+    scareEl.hidden = true;
+    doomMsg.textContent = "";
+    stopScream();
+  }
+
+  function startDoom() {
+    if (doomActive) return;
+    doomActive = true;
+    holdFired = true;
+    doomShownAt = Date.now();
+    doomMsg.textContent = "";
+    doomEl.hidden = false;
+    scareEl.hidden = true;
+    var msgs = ["u did a mistake", "u shall not survive", "how dare u insult the cookie god"];
+    msgs.forEach(function (t, i) {
+      doomTimers.push(setTimeout(function () { showDoomMsg(t); }, 1000 * (i + 1)));
+    });
+    doomTimers.push(setTimeout(function () { scareEl.hidden = false; scream(); }, 4000));
+    doomTimers.push(setTimeout(function () { scareEl.hidden = true; stopScream(); showDoomMsg("the cookie god is merciful. this time."); }, 6600));
+    doomTimers.push(setTimeout(endDoom, 9000));
+  }
+
+  function holdStart() {
+    if (doomActive || holdTimer) return;
+    holdFired = false;
+    prepAudio();
+    holdTimer = setTimeout(function () { holdTimer = null; startDoom(); }, 3000);
+  }
+  function holdCancel() {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+  }
+
+  cookieBtn.addEventListener("pointerdown", function (e) {
+    if (typeof e.button === "number" && e.button !== 0) return;
+    holdStart();
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) { cookieBtn.addEventListener(ev, holdCancel); });
+  cookieBtn.addEventListener("keydown", function (e) {
+    if ((e.key === " " || e.key === "Enter") && !e.repeat) holdStart();
+  });
+  cookieBtn.addEventListener("keyup", holdCancel);
+  cookieBtn.addEventListener("blur", holdCancel);
+  cookieBtn.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  function doomLeave() { if (doomActive && Date.now() - doomShownAt > 800) endDoom(); }
+  doomEl.addEventListener("pointerdown", doomLeave);
+  scareEl.addEventListener("pointerdown", doomLeave);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && doomActive) endDoom(); });
+
+  /* Chess engine */
+  var Chess = (function () {
+    var P = 1, N = 2, B = 3, R = 4, Q = 5, K = 6;
+    var WK = 1, WQ = 2, BK = 4, BQ = 8;
+    var KNO = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+    var KGO = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+    var DIAG = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+    var ORTH = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    var QDIR = DIAG.concat(ORTH);
+    var FILES = "abcdefgh";
+    var LETTER = ["", "", "N", "B", "R", "Q", "K"];
+    var VAL = [0, 100, 320, 330, 500, 900, 0];
+    var MATE = 100000;
+    var INF = 1000000;
+    var START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    var RIGHTS = [];
+    for (var ri = 0; ri < 64; ri++) RIGHTS.push(15);
+    RIGHTS[60] = 12; RIGHTS[63] = 14; RIGHTS[56] = 13;
+    RIGHTS[4] = 3; RIGHTS[7] = 11; RIGHTS[0] = 7;
+
+    function sqName(i) { return FILES.charAt(i & 7) + String(8 - (i >> 3)); }
+
+    function Game() {
+      this.board = new Int8Array(64);
+      this.kp = [60, 4];
+      this.reset();
+    }
+
+    Game.prototype.reset = function () { this.load(START_FEN); };
+
+    Game.prototype.load = function (fen) {
+      var parts = fen.split(" "), rows = parts[0].split("/"), b = this.board;
+      var map = { p: 1, n: 2, b: 3, r: 4, q: 5, k: 6 };
+      var r, c, i, ch, n, lower, t;
+      for (i = 0; i < 64; i++) b[i] = 0;
+      for (r = 0; r < 8; r++) {
+        c = 0;
+        for (i = 0; i < rows[r].length; i++) {
+          ch = rows[r].charAt(i);
+          n = parseInt(ch, 10);
+          if (n >= 1 && n <= 8) { c += n; }
+          else {
+            lower = ch === ch.toLowerCase();
+            t = map[ch.toLowerCase()];
+            b[r * 8 + c] = lower ? -t : t;
+            if (t === K) this.kp[lower ? 1 : 0] = r * 8 + c;
+            c++;
+          }
+        }
+      }
+      this.turn = parts[1] === "b" ? -1 : 1;
+      this.castle = 0;
+      var cs = parts[2] || "-";
+      for (i = 0; i < cs.length; i++) {
+        ch = cs.charAt(i);
+        if (ch === "K") this.castle |= WK;
+        else if (ch === "Q") this.castle |= WQ;
+        else if (ch === "k") this.castle |= BK;
+        else if (ch === "q") this.castle |= BQ;
+      }
+      var ep = parts[3] || "-";
+      this.ep = ep === "-" ? -1 : (8 - parseInt(ep.charAt(1), 10)) * 8 + (ep.charCodeAt(0) - 97);
+      this.half = parseInt(parts[4] || "0", 10);
+      this.full = parseInt(parts[5] || "1", 10);
+      this.stack = [];
+      this.sans = [];
+      this.keys = [this.key()];
+    };
+
+    Game.prototype.key = function () {
+      var s = "", b = this.board, i;
+      for (i = 0; i < 64; i++) s += String.fromCharCode(b[i] + 70);
+      return s + this.turn + "," + this.castle + "," + this.ep;
+    };
+
+    Game.prototype.attacked = function (sq, by) {
+      var b = this.board, r = sq >> 3, c = sq & 7, i, rr, cc, p, d;
+      var pr = by === 1 ? r + 1 : r - 1;
+      if (pr >= 0 && pr < 8) {
+        if (c > 0 && b[pr * 8 + c - 1] === by * P) return true;
+        if (c < 7 && b[pr * 8 + c + 1] === by * P) return true;
+      }
+      for (i = 0; i < 8; i++) {
+        rr = r + KNO[i][0]; cc = c + KNO[i][1];
+        if (rr >= 0 && rr < 8 && cc >= 0 && cc < 8 && b[rr * 8 + cc] === by * N) return true;
+        rr = r + KGO[i][0]; cc = c + KGO[i][1];
+        if (rr >= 0 && rr < 8 && cc >= 0 && cc < 8 && b[rr * 8 + cc] === by * K) return true;
+      }
+      for (d = 0; d < 4; d++) {
+        rr = r + DIAG[d][0]; cc = c + DIAG[d][1];
+        while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+          p = b[rr * 8 + cc];
+          if (p !== 0) { if (p === by * B || p === by * Q) return true; break; }
+          rr += DIAG[d][0]; cc += DIAG[d][1];
+        }
+        rr = r + ORTH[d][0]; cc = c + ORTH[d][1];
+        while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+          p = b[rr * 8 + cc];
+          if (p !== 0) { if (p === by * R || p === by * Q) return true; break; }
+          rr += ORTH[d][0]; cc += ORTH[d][1];
+        }
+      }
+      return false;
+    };
+
+    function pushPromo(ms, from, to) {
+      ms.push(from | (to << 6) | (5 << 12));
+      ms.push(from | (to << 6) | (4 << 12));
+      ms.push(from | (to << 6) | (3 << 12));
+      ms.push(from | (to << 6) | (2 << 12));
+    }
+
+    Game.prototype.gen = function () {
+      var b = this.board, t = this.turn, ms = [];
+      var sq, p, a, r, c, rr, cc, to, tp, dir, i, d, last, offs, dirs;
+      for (sq = 0; sq < 64; sq++) {
+        p = b[sq];
+        if (p === 0 || (p > 0) !== (t > 0)) continue;
+        a = p > 0 ? p : -p;
+        r = sq >> 3; c = sq & 7;
+        if (a === P) {
+          dir = t === 1 ? -1 : 1;
+          rr = r + dir;
+          if (rr < 0 || rr > 7) continue;
+          last = rr === 0 || rr === 7;
+          to = rr * 8 + c;
+          if (b[to] === 0) {
+            if (last) { pushPromo(ms, sq, to); }
+            else {
+              ms.push(sq | (to << 6));
+              if (r === (t === 1 ? 6 : 1) && b[to + dir * 8] === 0) ms.push(sq | ((to + dir * 8) << 6) | (4 << 15));
+            }
+          }
+          for (d = -1; d <= 1; d += 2) {
+            cc = c + d;
+            if (cc < 0 || cc > 7) continue;
+            to = rr * 8 + cc; tp = b[to];
+            if (tp !== 0 && (tp > 0) !== (t > 0)) {
+              if (last) pushPromo(ms, sq, to); else ms.push(sq | (to << 6));
+            } else if (tp === 0 && to === this.ep) {
+              ms.push(sq | (to << 6) | (1 << 15));
+            }
+          }
+        } else if (a === N || a === K) {
+          offs = a === N ? KNO : KGO;
+          for (i = 0; i < 8; i++) {
+            rr = r + offs[i][0]; cc = c + offs[i][1];
+            if (rr < 0 || rr > 7 || cc < 0 || cc > 7) continue;
+            to = rr * 8 + cc; tp = b[to];
+            if (tp === 0 || (tp > 0) !== (t > 0)) ms.push(sq | (to << 6));
+          }
+          if (a === K) {
+            if (t === 1 && sq === 60) {
+              if ((this.castle & WK) && b[61] === 0 && b[62] === 0 && !this.attacked(60, -1) && !this.attacked(61, -1)) ms.push(60 | (62 << 6) | (2 << 15));
+              if ((this.castle & WQ) && b[59] === 0 && b[58] === 0 && b[57] === 0 && !this.attacked(60, -1) && !this.attacked(59, -1)) ms.push(60 | (58 << 6) | (2 << 15));
+            } else if (t === -1 && sq === 4) {
+              if ((this.castle & BK) && b[5] === 0 && b[6] === 0 && !this.attacked(4, 1) && !this.attacked(5, 1)) ms.push(4 | (6 << 6) | (2 << 15));
+              if ((this.castle & BQ) && b[3] === 0 && b[2] === 0 && b[1] === 0 && !this.attacked(4, 1) && !this.attacked(3, 1)) ms.push(4 | (2 << 6) | (2 << 15));
+            }
+          }
+        } else {
+          dirs = a === B ? DIAG : (a === R ? ORTH : QDIR);
+          for (d = 0; d < dirs.length; d++) {
+            rr = r + dirs[d][0]; cc = c + dirs[d][1];
+            while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+              to = rr * 8 + cc; tp = b[to];
+              if (tp === 0) { ms.push(sq | (to << 6)); }
+              else { if ((tp > 0) !== (t > 0)) ms.push(sq | (to << 6)); break; }
+              rr += dirs[d][0]; cc += dirs[d][1];
+            }
+          }
+        }
+      }
+      return ms;
+    };
+
+    Game.prototype.make = function (m) {
+      var from = m & 63, to = (m >> 6) & 63, promo = (m >> 12) & 7, flag = m >> 15;
+      var b = this.board, p = b[from], t = this.turn;
+      var u = { m: m, cap: b[to], capSq: to, castle: this.castle, ep: this.ep, half: this.half };
+      b[to] = p; b[from] = 0;
+      if (flag & 1) {
+        u.capSq = to + (t === 1 ? 8 : -8);
+        u.cap = b[u.capSq];
+        b[u.capSq] = 0;
+      }
+      if (promo) b[to] = t * promo;
+      if (flag & 2) {
+        if (to === 62) { b[61] = b[63]; b[63] = 0; }
+        else if (to === 58) { b[59] = b[56]; b[56] = 0; }
+        else if (to === 6) { b[5] = b[7]; b[7] = 0; }
+        else { b[3] = b[0]; b[0] = 0; }
+      }
+      if (p === t * K) this.kp[t === 1 ? 0 : 1] = to;
+      this.castle &= RIGHTS[from] & RIGHTS[to];
+      this.ep = (flag & 4) ? ((from + to) >> 1) : -1;
+      this.half = (p === P || p === -P || u.cap !== 0) ? 0 : this.half + 1;
+      if (t === -1) this.full++;
+      this.turn = -t;
+      this.stack.push(u);
+    };
+
+    Game.prototype.unmake = function () {
+      var u = this.stack.pop(), m = u.m;
+      var from = m & 63, to = (m >> 6) & 63, promo = (m >> 12) & 7, flag = m >> 15;
+      var b = this.board, t;
+      this.turn = -this.turn;
+      t = this.turn;
+      var p = b[to];
+      if (promo) p = t * P;
+      b[from] = p;
+      b[to] = 0;
+      if (flag & 1) { b[u.capSq] = u.cap; } else { b[to] = u.cap; }
+      if (flag & 2) {
+        if (to === 62) { b[63] = b[61]; b[61] = 0; }
+        else if (to === 58) { b[56] = b[59]; b[59] = 0; }
+        else if (to === 6) { b[7] = b[5]; b[5] = 0; }
+        else { b[0] = b[3]; b[3] = 0; }
+      }
+      if (p === t * K) this.kp[t === 1 ? 0 : 1] = from;
+      this.castle = u.castle; this.ep = u.ep; this.half = u.half;
+      if (t === -1) this.full--;
+    };
+
+    Game.prototype.inCheck = function () {
+      return this.attacked(this.kp[this.turn === 1 ? 0 : 1], -this.turn);
+    };
+
+    Game.prototype.legal = function (capsOnly) {
+      var ps = this.gen(), out = [], t = this.turn, ki = t === 1 ? 0 : 1, b = this.board, i, m;
+      for (i = 0; i < ps.length; i++) {
+        m = ps[i];
+        if (capsOnly && b[(m >> 6) & 63] === 0 && !((m >> 15) & 1) && !((m >> 12) & 7)) continue;
+        this.make(m);
+        if (!this.attacked(this.kp[ki], -t)) out.push(m);
+        this.unmake();
+      }
+      return out;
+    };
+
+    Game.prototype.san = function (m) {
+      var from = m & 63, to = (m >> 6) & 63, promo = (m >> 12) & 7, flag = m >> 15;
+      var b = this.board, p = b[from], a = p > 0 ? p : -p, s, cap, i, o, sameFile, sameRank, amb;
+      if (flag & 2) { s = to > from ? "O-O" : "O-O-O"; }
+      else {
+        cap = b[to] !== 0 || (flag & 1);
+        if (a === P) {
+          s = cap ? FILES.charAt(from & 7) + "x" : "";
+          s += sqName(to);
+          if (promo) s += "=" + LETTER[promo];
+        } else {
+          s = LETTER[a];
+          var ls = this.legal();
+          sameFile = false; sameRank = false; amb = false;
+          for (i = 0; i < ls.length; i++) {
+            o = ls[i];
+            if (o === m) continue;
+            if (((o >> 6) & 63) === to && (o & 63) !== from && (b[o & 63] === p)) {
+              amb = true;
+              if ((o & 7) === (from & 7)) sameFile = true;
+              if ((o & 63) >> 3 === from >> 3) sameRank = true;
+            }
+          }
+          if (amb) {
+            if (!sameFile) s += FILES.charAt(from & 7);
+            else if (!sameRank) s += String(8 - (from >> 3));
+            else s += sqName(from);
+          }
+          if (cap) s += "x";
+          s += sqName(to);
+        }
+      }
+      this.make(m);
+      if (this.inCheck()) s += this.legal().length > 0 ? "+" : "#";
+      this.unmake();
+      return s;
+    };
+
+    Game.prototype.play = function (m) {
+      var s = this.san(m);
+      this.make(m);
+      this.keys.push(this.key());
+      this.sans.push(s);
+    };
+
+    Game.prototype.undo = function () {
+      if (!this.stack.length) return;
+      this.unmake();
+      this.keys.pop();
+      this.sans.pop();
+    };
+
+    Game.prototype.lastMove = function () {
+      return this.stack.length ? this.stack[this.stack.length - 1].m : 0;
+    };
+
+    Game.prototype.insufficient = function () {
+      var b = this.board, minors = [], i, a;
+      for (i = 0; i < 64; i++) {
+        a = b[i] < 0 ? -b[i] : b[i];
+        if (a === 0 || a === K) continue;
+        if (a !== N && a !== B) return false;
+        minors.push(a === B ? ((i >> 3) + (i & 7)) % 2 : 2);
+      }
+      if (minors.length <= 1) return true;
+      for (i = 0; i < minors.length; i++) {
+        if (minors[i] === 2 || minors[i] !== minors[0]) return false;
+      }
+      return true;
+    };
+
+    Game.prototype.result = function () {
+      var ms = this.legal(), i, n = 0, k;
+      if (ms.length === 0) {
+        return this.inCheck() ? "Checkmate. " + (this.turn === 1 ? "Black" : "White") + " wins." : "Stalemate. The game is a draw.";
+      }
+      if (this.half >= 100) return "Draw by the fifty-move rule.";
+      k = this.keys[this.keys.length - 1];
+      for (i = 0; i < this.keys.length; i++) if (this.keys[i] === k) n++;
+      if (n >= 3) return "Draw by threefold repetition.";
+      if (this.insufficient()) return "Draw. Neither side has enough material to checkmate.";
+      return "";
+    };
+
+    /* Bot */
+    function bonus(a, sq, col) {
+      var r = sq >> 3, c = sq & 7;
+      var prog = col === 1 ? 7 - r : r;
+      var dc = Math.max(Math.abs(r - 3.5), Math.abs(c - 3.5));
+      var cen = 3.5 - dc;
+      var file = 3.5 - Math.abs(c - 3.5);
+      if (a === P) return prog * 6 + file * 4;
+      if (a === N) return cen * 12;
+      if (a === B) return cen * 6;
+      if (a === R) return prog === 6 ? 15 : 0;
+      if (a === Q) return cen * 2;
+      if (a === K) return -cen * 10 + (prog === 0 ? 10 : 0);
+      return 0;
+    }
+
+    function evaluate(g) {
+      var b = g.board, s = 0, i, p, a, col;
+      for (i = 0; i < 64; i++) {
+        p = b[i];
+        if (p === 0) continue;
+        col = p > 0 ? 1 : -1;
+        a = p > 0 ? p : -p;
+        s += col * (VAL[a] + bonus(a, i, col));
+      }
+      return g.turn * s;
+    }
+
+    function order(g, ms) {
+      var b = g.board, arr = [], i, m, to, v, sc;
+      for (i = 0; i < ms.length; i++) {
+        m = ms[i];
+        to = (m >> 6) & 63;
+        v = b[to] < 0 ? -b[to] : b[to];
+        if ((m >> 15) & 1) v = P;
+        sc = 0;
+        if (v) sc = 10 * VAL[v] - VAL[b[m & 63] < 0 ? -b[m & 63] : b[m & 63]] + 10000;
+        if ((m >> 12) & 7) sc += VAL[(m >> 12) & 7];
+        arr.push({ m: m, s: sc });
+      }
+      arr.sort(function (x, y) { return y.s - x.s; });
+      return arr.map(function (o) { return o.m; });
+    }
+
+    function qsearch(g, alpha, beta, qd) {
+      var stand = evaluate(g);
+      if (stand >= beta) return beta;
+      if (stand > alpha) alpha = stand;
+      if (qd <= 0) return alpha;
+      var ms = order(g, g.legal(true)), i, sc;
+      for (i = 0; i < ms.length; i++) {
+        g.make(ms[i]);
+        sc = -qsearch(g, -beta, -alpha, qd - 1);
+        g.unmake();
+        if (sc >= beta) return beta;
+        if (sc > alpha) alpha = sc;
+      }
+      return alpha;
+    }
+
+    function search(g, depth, alpha, beta, ply, useQ) {
+      if (depth <= 0) return useQ ? qsearch(g, alpha, beta, 3) : evaluate(g);
+      var ms = g.legal(), i, sc;
+      if (ms.length === 0) return g.inCheck() ? -MATE + ply : 0;
+      ms = order(g, ms);
+      for (i = 0; i < ms.length; i++) {
+        g.make(ms[i]);
+        sc = -search(g, depth - 1, -beta, -alpha, ply + 1, useQ);
+        g.unmake();
+        if (sc >= beta) return beta;
+        if (sc > alpha) alpha = sc;
+      }
+      return alpha;
+    }
+
+    function botConfig(elo) {
+      var t = Math.max(0, Math.min(1, (elo - 500) / 1000));
+      return {
+        depth: elo < 900 ? 1 : (elo < 1200 ? 2 : (elo < 1400 ? 3 : 4)),
+        quiet: elo >= 800,
+        noise: 400 - 380 * t,
+        blunder: 0.35 - 0.31 * t
+      };
+    }
+
+    function pick(g, elo) {
+      var cfg = botConfig(elo);
+      var all = g.legal(), ms = [], i, m, pr;
+      for (i = 0; i < all.length; i++) {
+        pr = (all[i] >> 12) & 7;
+        if (pr === 0 || pr === 5) ms.push(all[i]);
+      }
+      if (ms.length === 0) return 0;
+      if (Math.random() < cfg.blunder) return ms[Math.floor(Math.random() * ms.length)];
+      ms = order(g, ms);
+      var best = ms[0], bestScore = -INF * 2, sc;
+      for (i = 0; i < ms.length; i++) {
+        m = ms[i];
+        g.make(m);
+        sc = -search(g, cfg.depth - 1, -INF, INF, 1, cfg.quiet);
+        g.unmake();
+        sc += (Math.random() * 2 - 1) * cfg.noise;
+        if (sc > bestScore) { bestScore = sc; best = m; }
+      }
+      return best;
+    }
+
+    function perft(g, depth) {
+      if (depth === 0) return 1;
+      var ms = g.legal(), n = 0, i;
+      if (depth === 1) return ms.length;
+      for (i = 0; i < ms.length; i++) {
+        g.make(ms[i]);
+        n += perft(g, depth - 1);
+        g.unmake();
+      }
+      return n;
+    }
+
+    return { Game: Game, pick: pick, perft: perft, botConfig: botConfig };
+  })();
+
+
+  /* Play board */
+  var PG = ["", "♟︎", "♞︎", "♝︎", "♜︎", "♛︎", "♚︎"];
+  var PNAME = ["", "pawn", "knight", "bishop", "rook", "queen", "king"];
+  var PFILES = "abcdefgh";
+  var pg = new Chess.Game();
+  var pMode = "bot", pHuman = 1, pElo = 1000, pFlip = false;
+  var pSel = -1, pThinking = false, pGameId = 0, pPending = null, pLegal = [], pOver = false;
+  var plBoard = document.getElementById("playBoard");
+  var plStatus = document.getElementById("plStatus");
+  var plPromo = document.getElementById("plPromo");
+  var plHist = document.getElementById("plHist");
+  var plBotOpts = document.getElementById("plBotOpts");
+  var plModes = document.querySelectorAll("#plModes button");
+  var plSides = document.querySelectorAll("#plSides button");
+  var plEloEl = document.getElementById("plElo");
+  var plEloVal = document.getElementById("plEloVal");
+  var plCells = [];
+
+  (function () {
+    for (var i = 0; i < 64; i++) {
+      var d = document.createElement("button");
+      d.type = "button";
+      d.className = "sq";
+      var pc = document.createElement("span"); pc.className = "pc";
+      var rk = document.createElement("span"); rk.className = "rank";
+      var fl = document.createElement("span"); fl.className = "file";
+      d.appendChild(pc); d.appendChild(rk); d.appendChild(fl);
+      plBoard.appendChild(d);
+      plCells.push(d);
+    }
+  })();
+
+  function pRender() {
+    var lm = pg.lastMove();
+    var lf = lm ? (lm & 63) : -1, lt = lm ? ((lm >> 6) & 63) : -1;
+    var chk = pg.inCheck() ? pg.kp[pg.turn === 1 ? 0 : 1] : -1;
+    var tg = {}, i, m;
+    if (pSel >= 0) {
+      for (i = 0; i < pLegal.length; i++) {
+        m = pLegal[i];
+        if ((m & 63) === pSel) tg[(m >> 6) & 63] = true;
+      }
+    }
+    for (i = 0; i < 64; i++) {
+      var sq = pFlip ? 63 - i : i;
+      var cell = plCells[i];
+      var p = pg.board[sq], a = p < 0 ? -p : p, r = sq >> 3, c = sq & 7;
+      cell.className = "sq " + (((r + c) % 2 === 0) ? "l" : "d") +
+        (sq === pSel ? " sel" : "") +
+        (tg[sq] ? (p !== 0 ? " cap" : " tgt") : "") +
+        ((sq === lf || sq === lt) ? " hl" : "") +
+        (sq === chk ? " chk" : "");
+      cell.setAttribute("data-sq", String(sq));
+      cell.setAttribute("aria-label", PFILES.charAt(c) + String(8 - r) + (p !== 0 ? ", " + (p > 0 ? "white " : "black ") + PNAME[a] : ""));
+      var pcEl = cell.children[0];
+      if (p === 0) { pcEl.textContent = ""; pcEl.className = "pc"; }
+      else { pcEl.textContent = PG[a]; pcEl.className = "pc " + (p > 0 ? "w" : "b"); }
+      cell.children[1].textContent = (i % 8 === 0) ? String(8 - r) : "";
+      cell.children[2].textContent = (i >= 56) ? PFILES.charAt(c) : "";
+    }
+  }
+
+  function pText() {
+    var txt;
+    if (pOver) { txt = pg.result(); }
+    else {
+      txt = (pg.turn === 1 ? "White" : "Black") + " to move" + (pg.inCheck() ? ". Check!" : ".");
+      if (pMode === "bot") txt += pThinking ? " The bot is thinking..." : (pg.turn === pHuman ? " Your turn." : "");
+    }
+    plStatus.textContent = txt;
+  }
+
+  function pHistRender() {
+    plHist.innerHTML = "";
+    if (pg.sans.length === 0) {
+      var e = document.createElement("span");
+      e.className = "empty";
+      e.textContent = "No moves yet.";
+      plHist.appendChild(e);
+      return;
+    }
+    pg.sans.forEach(function (s, i) {
+      if (i % 2 === 0) {
+        var n = document.createElement("span");
+        n.className = "num";
+        n.textContent = String(i / 2 + 1) + ".";
+        plHist.appendChild(n);
+      }
+      var mv = document.createElement("span");
+      mv.textContent = s;
+      plHist.appendChild(mv);
+    });
+    plHist.scrollTop = plHist.scrollHeight;
+  }
+
+  function pSync() {
+    plModes.forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-mode") === pMode ? "true" : "false"); });
+    plSides.forEach(function (b) { b.setAttribute("aria-pressed", parseInt(b.getAttribute("data-side"), 10) === pHuman ? "true" : "false"); });
+    plBotOpts.hidden = pMode !== "bot";
+  }
+
+  function pAfter() {
+    pLegal = pg.legal();
+    pOver = pg.result() !== "";
+    pRender();
+    pText();
+    pHistRender();
+    if (!pOver && pMode === "bot" && pg.turn !== pHuman) pBotMove();
+  }
+
+  function pBotMove() {
+    var id = pGameId;
+    pThinking = true;
+    pText();
+    setTimeout(function () {
+      if (id !== pGameId) return;
+      var m = Chess.pick(pg, pElo);
+      pThinking = false;
+      if (m) pg.play(m);
+      pSel = -1;
+      pAfter();
+    }, 350);
+  }
+
+  function pClick(sq) {
+    if (pOver || pThinking) return;
+    if (pPending) { pPending = null; plPromo.hidden = true; }
+    if (pMode === "bot" && pg.turn !== pHuman) return;
+    var p = pg.board[sq], i, cands = [];
+    if (pSel >= 0) {
+      for (i = 0; i < pLegal.length; i++) {
+        if ((pLegal[i] & 63) === pSel && ((pLegal[i] >> 6) & 63) === sq) cands.push(pLegal[i]);
+      }
+      if (cands.length > 1) { pPending = cands; plPromo.hidden = false; pRender(); return; }
+      if (cands.length === 1) { pg.play(cands[0]); pSel = -1; pAfter(); return; }
+    }
+    if (p !== 0 && (p > 0) === (pg.turn > 0)) pSel = (pSel === sq) ? -1 : sq;
+    else pSel = -1;
+    pRender();
+  }
+
+  function pNew() {
+    pGameId++;
+    pThinking = false;
+    pSel = -1;
+    pPending = null;
+    plPromo.hidden = true;
+    pg.reset();
+    pFlip = (pMode === "bot" && pHuman === -1);
+    pSync();
+    pAfter();
+  }
+
+  plBoard.addEventListener("click", function (e) {
+    var t = e.target;
+    while (t && t !== plBoard && !(t.getAttribute && t.getAttribute("data-sq") !== null)) t = t.parentNode;
+    if (!t || t === plBoard) return;
+    pClick(parseInt(t.getAttribute("data-sq"), 10));
+  });
+
+  plPromo.addEventListener("click", function (e) {
+    var v = e.target && e.target.getAttribute ? e.target.getAttribute("data-p") : null;
+    if (!v || !pPending) return;
+    var want = parseInt(v, 10), i;
+    for (i = 0; i < pPending.length; i++) {
+      if (((pPending[i] >> 12) & 7) === want) {
+        pg.play(pPending[i]);
+        pPending = null;
+        plPromo.hidden = true;
+        pSel = -1;
+        pAfter();
+        return;
+      }
+    }
+  });
+
+  plModes.forEach(function (b) {
+    b.addEventListener("click", function () { pMode = b.getAttribute("data-mode"); pNew(); });
+  });
+  plSides.forEach(function (b) {
+    b.addEventListener("click", function () { pHuman = parseInt(b.getAttribute("data-side"), 10); pNew(); });
+  });
+  plEloEl.addEventListener("input", function () {
+    pElo = parseInt(plEloEl.value, 10);
+    plEloVal.textContent = String(pElo);
+  });
+  document.getElementById("plNew").addEventListener("click", pNew);
+  document.getElementById("plFlip").addEventListener("click", function () { pFlip = !pFlip; pRender(); });
+  document.getElementById("plUndo").addEventListener("click", function () {
+    if (pThinking || pg.sans.length === 0) return;
+    pGameId++;
+    pg.undo();
+    if (pMode === "bot" && pg.turn !== pHuman && pg.sans.length > 0) pg.undo();
+    pSel = -1;
+    pPending = null;
+    plPromo.hidden = true;
+    pAfter();
+  });
+
+  pNew();
+})();
+</script>
+
+</body></html>
