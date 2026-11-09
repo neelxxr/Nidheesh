@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/The Chess Compendium-1.html" }
+    { "source": "/", "destination": "/The Chess Compendium1.html" }
   ]
 }
